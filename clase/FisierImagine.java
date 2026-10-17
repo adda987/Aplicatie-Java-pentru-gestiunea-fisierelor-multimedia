@@ -1,5 +1,7 @@
 package clase;
 
+import decorator.InterfataImagine;
+
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -8,12 +10,12 @@ import javax.imageio.ImageIO;
 /**
  * Clasa care descrie un fisier imagine (.jpg, .png).
  * Pe langa dimensiuni, poate incarca in memorie matricea de pixeli,
- * folosita ulterior pentru aplicarea de efecte (grayscale, sepia, negativ).
+ * folosita pentru aplicarea de efecte prin decoratori (grayscale, sepia, negativ).
  *
  * @author Sfetcu Andreea-Daniela
  * @version 1.0
  */
-public class FisierImagine extends FisierMultimedia {
+public class FisierImagine extends FisierMultimedia implements InterfataImagine {
 
     private int latime;
     private int lungime;
@@ -43,6 +45,19 @@ public class FisierImagine extends FisierMultimedia {
 
     public void setMatricePixeli(int[][] matricePixeli) {
         this.matricePixeli = matricePixeli;
+    }
+
+    /**
+     * Returneaza matricea de pixeli
+     *
+     * @return matricea de pixeli [lungime][latime]
+     * @throws IOException daca imaginea nu poate fi citita
+     */
+    @Override
+    public int[][] getPixeli() throws IOException {
+        if (matricePixeli == null)
+            incarcaPixeli();
+        return matricePixeli;
     }
 
     /**
