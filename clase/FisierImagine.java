@@ -8,9 +8,8 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 /**
- * Clasa care descrie un fisier imagine (.jpg, .png).
- * Pe langa dimensiuni, poate incarca in memorie matricea de pixeli,
- * folosita pentru aplicarea de efecte prin decoratori (grayscale, sepia, negativ).
+ * Clasa care descrie un fisier imagine (.jpg, .jpeg, .png).
+ * Pe langa rezolutie, poate citi matricea de pixeli, folosita pentru aplicarea de efecte prin decoratori (grayscale, sepia, negativ).
  *
  * @author Sfetcu Andreea-Daniela
  * @version 1.0
@@ -19,81 +18,42 @@ public class FisierImagine extends FisierMultimedia implements InterfataImagine 
 
     private int latime;
     private int lungime;
-    private int[][] matricePixeli;
-
-    public FisierImagine(String nume, String extensie, long dimensiune, String cale, int latime, int lungime) {
-        super(nume, extensie, dimensiune, cale, TipFisier.IMAGINE);
-        this.latime = latime;
-        this.lungime = lungime;
-    }
 
     public FisierImagine(File fisier) {
         super(fisier, TipFisier.IMAGINE);
-    }
-
-    public int getLatime() {
-        return latime;
-    }
-
-    public int getLungime() {
-        return lungime;
-    }
-
-    public int[][] getMatricePixeli() {
-        return matricePixeli;
-    }
-
-    public void setMatricePixeli(int[][] matricePixeli) {
-        this.matricePixeli = matricePixeli;
+        try {
+            BufferedImage imagine = ImageIO.read(fisier);
+            if (imagine != null) {
+                this.latime = imagine.getWidth();
+                this.lungime = imagine.getHeight();
+            }
+        } catch (IOException e) {
+            System.out.println("Imaginea " + nume + " nu a putut fi citita.");
+        }
     }
 
     /**
-     * Returneaza matricea de pixeli
+     * Citeste imaginea si returneaza culoarea fiecarui pixel.
      *
      * @return matricea de pixeli [lungime][latime]
      * @throws IOException daca imaginea nu poate fi citita
      */
     @Override
     public int[][] getPixeli() throws IOException {
-        if (matricePixeli == null)
-            incarcaPixeli();
-        return matricePixeli;
-    }
-
-    /**
-     * Citeste imaginea de pe disc si incarca fiecare pixel in matricePixeli.
-     * Fiecare element retine culoarea pixelului (alpha, rosu, verde, albastru).
-     *
-     * @throws IOException daca fisierul nu poate fi citit sau nu este o imagine valida
-     */
-    public void incarcaPixeli() throws IOException {
-        BufferedImage imagine = ImageIO.read(new File(getCale()));
+        BufferedImage imagine = ImageIO.read(new File(cale));
         if (imagine == null)
-            throw new IOException("Fisierul nu este o imagine valida: " + getCale());
+            throw new IOException("Fisierul nu este o imagine valida: " + cale);
 
-        latime = imagine.getWidth();
-        lungime = imagine.getHeight();
-        matricePixeli = new int[lungime][latime];
-
-        for (int i = 0; i < lungime; i++)
-            for (int j = 0; j < latime; j++)
-                matricePixeli[i][j] = imagine.getRGB(j, i);
+        int[][] pixeli = new int[imagine.getHeight()][imagine.getWidth()];
+        for (int i = 0; i < pixeli.length; i++)
+            for (int j = 0; j < pixeli[i].length; j++)
+                pixeli[i][j] = imagine.getRGB(j, i);
+        return pixeli;
     }
 
     @Override
     public String genereazaDescriere() {
-        String rezolutie = "necunoscuta";
-        if (latime > 0 && lungime > 0)
-            rezolutie = latime + "x" + lungime;
-        return "Fisier imagine " + getNume() + " (" + getExtensie() + "), rezolutie " + rezolutie +
-                ", " + String.format("%.2f", getDimensiuneKB()) + " KB, in " + getCale();
-    }
-
-    @Override
-    public String toString() {
-        return "FisierImagine{" +
-                "latime=" + latime +
-                ", lungime=" + lungime +
-                "} " + super.toString();
+        return "Fisier imagine " + nume + " (" + extensie + "), rezolutie " + latime + "x" + lungime +
+                ", " + String.format("%.2f", getDimensiuneKB()) + " KB, in " + cale;
     }
 }

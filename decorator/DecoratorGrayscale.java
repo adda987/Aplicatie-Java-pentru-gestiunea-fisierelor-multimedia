@@ -1,5 +1,7 @@
 package decorator;
 
+import java.awt.Color;
+
 /**
  * Decorator care transforma imaginea in nuante de gri.
  *
@@ -13,13 +15,13 @@ public class DecoratorGrayscale extends DecoratorImagine {
     }
 
     @Override
-    protected int aplicaEfect(int pixel) {
-        int gri = (int) (0.299 * rosu(pixel) + 0.587 * verde(pixel) + 0.114 * albastru(pixel));
-        return construiestePixel(alpha(pixel), gri, gri, gri);
+    public String getNumeEfect() {
+        return "grayscale";
     }
 
     @Override
-    public String genereazaDescriere() {
-        return super.genereazaDescriere() + " + efect grayscale";
+    protected Color aplicaEfect(Color c) {
+        int gri = (int) (0.299 * c.getRed() + 0.587 * c.getGreen() + 0.114 * c.getBlue());
+        return new Color(gri, gri, gri);
     }
 }

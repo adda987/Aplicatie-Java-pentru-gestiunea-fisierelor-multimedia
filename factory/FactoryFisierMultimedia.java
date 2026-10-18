@@ -6,8 +6,6 @@ import clase.FisierMultimedia;
 import clase.TipFisier;
 
 import java.io.File;
-import java.io.IOException;
-import javax.sound.sampled.UnsupportedAudioFileException;
 
 /**
  * Design pattern Simple Factory.
@@ -21,41 +19,39 @@ public class FactoryFisierMultimedia {
     /**
      * Stabileste tipul fisierului pe baza extensiei.
      *
-     * @param extensie extensia fisierului, ex: ".mp3"
-     * @return tipul fisierului
-     * @throws UnsupportedOperationException daca extensia nu este suportata
+     * @param fisier fisierul de pe disc
+     * @return tipul fisierului sau null daca extensia nu este suportata
      */
-    public static TipFisier getTip(String extensie) {
-        if (FisierMultimedia.esteAudio(extensie))
-            return TipFisier.AUDIO;
-        if (FisierMultimedia.esteImagine(extensie))
-            return TipFisier.IMAGINE;
-        throw new UnsupportedOperationException("Extensie nesuportata: " + extensie);
+    public static TipFisier getTip(File fisier) {
+        String extensie = FisierMultimedia.extrageExtensie(fisier.getName());
+        switch (extensie) {
+            case ".mp3":
+            case ".wav":
+                return TipFisier.AUDIO;
+            case ".jpg":
+            case ".jpeg":
+            case ".png":
+                return TipFisier.IMAGINE;
+            default:
+                return null;
+        }
     }
 
     /**
-     * Creeaza fisierul multimedia corespunzator unui fisier de pe disc.
+     * Creeaza fisierul multimedia corespunzator tipului primit.
      *
      * @param fisier fisierul de pe disc
+     * @param tip    tipul fisierului
      * @return un obiect FisierAudio sau FisierImagine
-     * @throws UnsupportedOperationException daca extensia nu este suportata
      */
-    public static FisierMultimedia getFisier(File fisier) {
-        TipFisier tip = getTip(FisierMultimedia.extrageExtensie(fisier.getName()));
-
+    public static FisierMultimedia getFisier(File fisier, TipFisier tip) {
         switch (tip) {
             case AUDIO:
-                FisierAudio audio = new FisierAudio(fisier);
-                try {
-                    audio.citesteDurata();
-                } catch (UnsupportedAudioFileException | IOException e) {
-                    throw new RuntimeException("Eroare la citirea duratei audio: " + e.getMessage(), e);
-                }
-                return audio;
+                return new FisierAudio(fisier);
             case IMAGINE:
                 return new FisierImagine(fisier);
             default:
-                throw new UnsupportedOperationException("Tip de fișier nesuportat: " + tip);
+                throw new UnsupportedOperationException();
         }
     }
 }

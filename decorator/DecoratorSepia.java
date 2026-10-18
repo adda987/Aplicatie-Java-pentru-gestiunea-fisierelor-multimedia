@@ -1,5 +1,7 @@
 package decorator;
 
+import java.awt.Color;
+
 /**
  * Decorator care aplica imaginii un ton sepia (aspect de fotografie veche).
  *
@@ -13,20 +15,16 @@ public class DecoratorSepia extends DecoratorImagine {
     }
 
     @Override
-    protected int aplicaEfect(int pixel) {
-        int r = rosu(pixel);
-        int g = verde(pixel);
-        int b = albastru(pixel);
-
-        int rosuNou = (int) (0.393 * r + 0.769 * g + 0.189 * b);
-        int verdeNou = (int) (0.349 * r + 0.686 * g + 0.168 * b);
-        int albastruNou = (int) (0.272 * r + 0.534 * g + 0.131 * b);
-
-        return construiestePixel(alpha(pixel), rosuNou, verdeNou, albastruNou);
+    public String getNumeEfect() {
+        return "sepia";
     }
 
     @Override
-    public String genereazaDescriere() {
-        return super.genereazaDescriere() + " + efect sepia";
+    protected Color aplicaEfect(Color c) {
+        int r = (int) (0.393 * c.getRed() + 0.769 * c.getGreen() + 0.189 * c.getBlue());
+        int g = (int) (0.349 * c.getRed() + 0.686 * c.getGreen() + 0.168 * c.getBlue());
+        int b = (int) (0.272 * c.getRed() + 0.534 * c.getGreen() + 0.131 * c.getBlue());
+
+        return new Color(Math.min(r, 255), Math.min(g, 255), Math.min(b, 255));
     }
 }

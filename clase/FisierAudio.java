@@ -17,52 +17,34 @@ public class FisierAudio extends FisierMultimedia {
 
     private int durataSecunde;
 
-    public FisierAudio(String nume, String extensie, long dimensiune, String cale, int durataSecunde) {
-        super(nume, extensie, dimensiune, cale, TipFisier.AUDIO);
-        this.durataSecunde = durataSecunde;
-    }
-
     public FisierAudio(File fisier) {
         super(fisier, TipFisier.AUDIO);
-        this.durataSecunde = 0;
-    }
-
-    public int getDurataSecunde() {
-        return durataSecunde;
-    }
-
-    public void setDurataSecunde(int durataSecunde) {
-        if (durataSecunde < 0)
-            throw new IllegalArgumentException("Durata nu poate fi negativa!");
-        this.durataSecunde = durataSecunde;
+        this.durataSecunde = citesteDurata(fisier);
     }
 
     /**
-     * Citeste durata fisierului de pe disc.
+     * Calculeaza durata fisierului audio in secunde.
      *
-     * @throws UnsupportedAudioFileException daca formatul nu poate fi citit (ex: .mp3)
-     * @throws IOException                   daca fisierul nu poate fi accesat
+     * @param fisier fisierul audio de pe disc
+     * @return durata in secunde
      */
-    public void citesteDurata() throws UnsupportedAudioFileException, IOException {
-        AudioInputStream ais = AudioSystem.getAudioInputStream(new File(getCale()));
-        AudioFormat format = ais.getFormat();
-        this.durataSecunde = (int) (ais.getFrameLength() / format.getFrameRate());
-        ais.close();
+    private int citesteDurata(File fisier) {
+        try {
+            AudioInputStream ais = AudioSystem.getAudioInputStream(fisier);
+            AudioFormat format = ais.getFormat();
+            int durata = (int) (ais.getFrameLength() / format.getFrameRate());
+            ais.close();
+            return durata;
+        } catch (UnsupportedAudioFileException | IOException e) {
+            System.out.println("Eroare la citirea duratei fisierului audio.");
+            return 0;
+        }
     }
 
     @Override
     public String genereazaDescriere() {
-        String durata = "necunoscuta";
-        if (durataSecunde > 0)
-            durata = String.format("%02d:%02d", durataSecunde / 60, durataSecunde % 60);
-        return "Fisier audio " + getNume() + " (" + getExtensie() + "), durata " + durata +
-                ", " + String.format("%.2f", getDimensiuneKB()) + " KB, in " + getCale();
-    }
-
-    @Override
-    public String toString() {
-        return "FisierAudio{" +
-                "durataSecunde=" + durataSecunde +
-                "} " + super.toString();
+        String durata = String.format("%02d:%02d", durataSecunde / 60, durataSecunde % 60);
+        return "Fisier audio " + nume + " (" + extensie + "), durata " + durata +
+                ", " + String.format("%.2f", getDimensiuneKB()) + " KB, in " + cale;
     }
 }

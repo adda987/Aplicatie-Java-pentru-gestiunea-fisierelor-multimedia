@@ -1,5 +1,7 @@
 package decorator;
 
+import java.awt.Color;
+
 /**
  * Decorator care inverseaza culorile imaginii (negativ).
  *
@@ -13,12 +15,12 @@ public class DecoratorNegativ extends DecoratorImagine {
     }
 
     @Override
-    protected int aplicaEfect(int pixel) {
-        return construiestePixel(alpha(pixel), 255 - rosu(pixel), 255 - verde(pixel), 255 - albastru(pixel));
+    public String getNumeEfect() {
+        return "negativ";
     }
 
     @Override
-    public String genereazaDescriere() {
-        return super.genereazaDescriere() + " + efect negativ";
+    protected Color aplicaEfect(Color c) {
+        return new Color(255 - c.getRed(), 255 - c.getGreen(), 255 - c.getBlue());
     }
 }

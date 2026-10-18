@@ -1,5 +1,6 @@
 package decorator;
 
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -27,75 +28,64 @@ public abstract class DecoratorImagine implements InterfataImagine {
 
     @Override
     public String genereazaDescriere() {
-        return imagine.genereazaDescriere();
+        return imagine.genereazaDescriere() + " + efect " + getNumeEfect();
     }
 
     /**
-     * Returneaza o matrice noua de pixeli, cu efectul aplicat pe fiecare pixel.
-     * Matricea imaginii decorate ramane nemodificata.
+     * Ia pixelii imaginii decorate si aplica efectul pe fiecare pixel.
      */
     @Override
     public int[][] getPixeli() throws IOException {
-        int[][] original = imagine.getPixeli();
-        int[][] rezultat = new int[original.length][];
-
-        for (int i = 0; i < original.length; i++) {
-            rezultat[i] = new int[original[i].length];
-            for (int j = 0; j < original[i].length; j++)
-                rezultat[i][j] = aplicaEfect(original[i][j]);
-        }
-        return rezultat;
+        int[][] pixeli = imagine.getPixeli();
+        for (int i = 0; i < pixeli.length; i++)
+            for (int j = 0; j < pixeli[i].length; j++) {
+                Color culoare = new Color(pixeli[i][j]);
+                pixeli[i][j] = aplicaEfect(culoare).getRGB();
+            }
+        return pixeli;
     }
-
-
-    protected abstract int aplicaEfect(int pixel);
 
     /**
-     * Salveaza imaginea cu efectele aplicate intr-un fisier nou (.png sau .jpg).
-     *
-     * @param destinatie fisierul in care se salveaza
-     * @throws IOException daca imaginea nu poate fi scrisa
+     * @return numele efectului, folosit si la denumirea fisierului salvat (ex: "sepia")
      */
-    public void salveaza(File destinatie) throws IOException {
+    public abstract String getNumeEfect();
+
+    /**
+     * Fiecare decorator concret spune cum se transforma culoarea unui pixel.
+     *
+     * @param culoare culoarea initiala a pixelului
+     * @return culoarea noua a pixelului
+     */
+    protected abstract Color aplicaEfect(Color culoare);
+
+    /**
+     * Salveaza imaginea cu efectul aplicat in directorul primit, ca fisier .png.
+     *
+     * @param director directorul in care se salveaza imaginea
+     * @return fisierul creat
+     * @throws IOException daca imaginea nu poate fi citita sau scrisa
+     */
+    public File salveaza(String director) throws IOException {
+
+        String nume = getNume();
+        int poz = nume.lastIndexOf('.');
+        if (poz > 0)
+            nume = nume.substring(0, poz);
+        String numeNou = nume + "_" + getNumeEfect();
+
+        File destinatie = new File(director, numeNou + ".png");
+        int nr = 1;
+        while (destinatie.exists()) {
+            destinatie = new File(director, numeNou + nr + ".png");
+            nr++;
+        }
+
         int[][] pixeli = getPixeli();
-        int lungime = pixeli.length;
-        int latime = pixeli[0].length;
-
-        String format = destinatie.getName().toLowerCase().endsWith(".png") ? "png" : "jpg";
-        int tipImagine = format.equals("png") ? BufferedImage.TYPE_INT_ARGB : BufferedImage.TYPE_INT_RGB;
-        BufferedImage rezultat = new BufferedImage(latime, lungime, tipImagine);
-
-        for (int i = 0; i < lungime; i++)
-            for (int j = 0; j < latime; j++)
+        BufferedImage rezultat = new BufferedImage(pixeli[0].length, pixeli.length, BufferedImage.TYPE_INT_RGB);
+        for (int i = 0; i < pixeli.length; i++)
+            for (int j = 0; j < pixeli[i].length; j++)
                 rezultat.setRGB(j, i, pixeli[i][j]);
-
-        if (!ImageIO.write(rezultat, format, destinatie))
-            throw new IOException("Imaginea nu a putut fi salvata in formatul " + format);
-    }
-
-    // metode ajutatoare pentru componentele unui pixel
-
-    protected static int alpha(int pixel) {
-        return (pixel >> 24) & 0xFF;
-    }
-
-    protected static int rosu(int pixel) {
-        return (pixel >> 16) & 0xFF;
-    }
-
-    protected static int verde(int pixel) {
-        return (pixel >> 8) & 0xFF;
-    }
-
-    protected static int albastru(int pixel) {
-        return pixel & 0xFF;
-    }
-
-    protected static int construiestePixel(int alpha, int rosu, int verde, int albastru) {
-        return (alpha << 24) | (limiteaza(rosu) << 16) | (limiteaza(verde) << 8) | limiteaza(albastru);
-    }
-
-    private static int limiteaza(int valoare) {
-        return Math.max(0, Math.min(255, valoare));
+        ImageIO.write(rezultat, "png", destinatie);
+        return destinatie;
     }
 }
