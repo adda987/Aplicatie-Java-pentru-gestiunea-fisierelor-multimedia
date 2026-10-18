@@ -1,0 +1,8 @@
+=== MENIU PRINCIPAL ===
+1. Afiseaza directoare monitorizate
+2. Adauga director
+3. Sterge director
+4. Afiseaza fisiere multimedia
+5. Filtreaza fisiere
+6. Aplica efect pe o imagine
+0. Iesire
