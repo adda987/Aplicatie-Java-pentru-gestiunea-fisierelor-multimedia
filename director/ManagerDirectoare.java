@@ -38,7 +38,7 @@ public class ManagerDirectoare {
      */
     public void adaugaDirector(String cale) throws IOException {
         if (cale == null || cale.trim().isEmpty())
-            throw new DirectorInvalidException("Calea nu poate fi vida.");
+            throw new DirectorInvalidException("Calea nu poate fi citita.");
 
         File director = new File(cale.trim());
         if (!director.exists() || !director.isDirectory() || !director.canRead() || !director.canExecute())

@@ -41,7 +41,9 @@ public class ScannerFisiere {
 
         for (FisierMultimedia fisier : rezultate) {
             String extensie = fisier.getExtensie();
-            fisiereDupaExtensie.computeIfAbsent(extensie, k -> new ArrayList<>()).add(fisier);
+            fisiereDupaExtensie
+                    .computeIfAbsent(extensie, k -> new ArrayList<>())
+                    .add(fisier);
             int index = indexExtensie(extensie);
             if (index >= 0)
                 statistici[index]++;
