@@ -42,14 +42,20 @@ public class Main {
                         System.out.println("Directorul a fost adaugat.");
                     } catch (IllegalArgumentException e) {
                         System.out.println("Eroare: " + e.getMessage());
+                    } catch (IOException e) {
+                        System.out.println("Eroare la salvarea listei de directoare: " + e.getMessage());
                     }
                     break;
                 case "3":
                     System.out.print("Introdu calea directorului pe care vrei sa il stergi: ");
-                    if (manager.stergeDirector(in.nextLine()))
-                        System.out.println("Directorul a fost sters din lista.");
-                    else
-                        System.out.println("Directorul nu exista in lista.");
+                    try {
+                        if (manager.stergeDirector(in.nextLine()))
+                            System.out.println("Directorul a fost sters din lista.");
+                        else
+                            System.out.println("Directorul nu exista in lista.");
+                    } catch (IOException e) {
+                        System.out.println("Eroare la salvarea listei de directoare: " + e.getMessage());
+                    }
                     break;
                 case "4":
                     afiseazaFisiere(scan.cautaToateFisiereleMedia());
@@ -60,6 +66,9 @@ public class Main {
                 case "6":
                     aplicaEfect(in, scan);
                     break;
+                case "7":
+                    scan.afiseazaStatistici();
+                    break;
                 case "0":
                     System.out.println("La revedere!");
                     break;
@@ -69,9 +78,6 @@ public class Main {
         }
     }
 
-    /**
-     * Citeste textul meniului din fisier.
-     */
     private static String citesteMeniu(String caleFisier) {
         StringBuilder sb = new StringBuilder();
         try (BufferedReader br = new BufferedReader(new FileReader(caleFisier))) {
@@ -79,7 +85,7 @@ public class Main {
             while ((linie = br.readLine()) != null)
                 sb.append(linie).append("\n");
         } catch (IOException e) {
-            System.out.println("Eroare la citirea meniului din fisier.");
+            System.out.println("Eroare la citirea meniului din fisier: " + e.getMessage());
         }
         return sb.toString();
     }

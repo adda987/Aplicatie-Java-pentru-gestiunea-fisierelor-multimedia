@@ -7,7 +7,9 @@ import factory.FactoryFisierMultimedia;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Clasa care parcurge directoarele monitorizate si cauta fisiere multimedia.
@@ -15,6 +17,8 @@ import java.util.List;
 public class ScannerFisiere {
 
     private ManagerDirectoare managerDirectoare;
+    private final int[] statistici = new int[5];
+    private final HashMap<String, List<FisierMultimedia>> fisiereDupaExtensie = new HashMap<>();
 
     public ScannerFisiere(ManagerDirectoare managerDirectoare) {
         this.managerDirectoare = managerDirectoare;
@@ -27,10 +31,52 @@ public class ScannerFisiere {
      */
     public List<FisierMultimedia> cautaToateFisiereleMedia() {
         List<FisierMultimedia> rezultate = new ArrayList<>();
+        fisiereDupaExtensie.clear();
+        for (int i = 0; i < statistici.length; i++)
+            statistici[i] = 0;
+
         for (String cale : managerDirectoare.getDirectoare())
             parcurgeDirector(new File(cale), rezultate);
         Collections.sort(rezultate);
+
+        for (FisierMultimedia fisier : rezultate) {
+            String extensie = fisier.getExtensie();
+            fisiereDupaExtensie.computeIfAbsent(extensie, k -> new ArrayList<>()).add(fisier);
+            int index = indexExtensie(extensie);
+            if (index >= 0)
+                statistici[index]++;
+        }
+
         return rezultate;
+    }
+
+    private int indexExtensie(String extensie) {
+        switch (extensie) {
+            case ".mp3":
+                return 0;
+            case ".wav":
+                return 1;
+            case ".jpg":
+                return 2;
+            case ".jpeg":
+                return 3;
+            case ".png":
+                return 4;
+            default:
+                return -1;
+        }
+    }
+
+    public void afiseazaStatistici() {
+        cautaToateFisiereleMedia();
+        int total = 0;
+        String[] extensii = {".mp3", ".wav", ".jpg", ".jpeg", ".png"};
+        System.out.println("Statistici fisiere multimedia:");
+        for (int i = 0; i < statistici.length; i++) {
+            System.out.println(extensii[i] + ": " + statistici[i]);
+            total += statistici[i];
+        }
+        System.out.println("Total: " + total);
     }
 
     /**
@@ -42,8 +88,10 @@ public class ScannerFisiere {
      */
     private void parcurgeDirector(File director, List<FisierMultimedia> rezultate) {
         File[] continut = director.listFiles();
-        if (continut == null) // directorul nu exista sau nu poate fi citit
+        if (continut == null) {
+            System.out.println("Directorul nu exista sau nu poate fi accesat: " + director.getAbsolutePath());
             return;
+        }
 
         for (File fisier : continut) {
             if (fisier.isDirectory()) {
@@ -65,10 +113,8 @@ public class ScannerFisiere {
     }
 
     public List<FisierMultimedia> cautaFisiereDupaExtensie(String extensie) {
-        List<FisierMultimedia> rezultate = new ArrayList<>();
-        for (FisierMultimedia fisier : cautaToateFisiereleMedia())
-            if (fisier.getExtensie().equalsIgnoreCase(extensie.trim()))
-                rezultate.add(fisier);
-        return rezultate;
+        cautaToateFisiereleMedia();
+        return new ArrayList<>(fisiereDupaExtensie.getOrDefault(
+                extensie.trim().toLowerCase(Locale.ROOT), Collections.emptyList()));
     }
 }
