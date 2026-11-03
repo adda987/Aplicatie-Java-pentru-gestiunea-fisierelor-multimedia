@@ -43,7 +43,7 @@ public class Main {
                     } catch (IllegalArgumentException e) {
                         System.out.println("Eroare: " + e.getMessage());
                     } catch (IOException e) {
-                        System.out.println("Eroare la salvarea listei de directoare: " + e.getMessage());
+                        System.out.println("Eroare la crearea directorului sau salvarea listei: " + e.getMessage());
                     }
                     break;
                 case "3":
@@ -105,8 +105,7 @@ public class Main {
                 afiseazaFisiere(scan.cautaFisiereDupaTip(TipFisier.IMAGINE));
                 break;
             case "3":
-                System.out.print("Introdu extensia (.mp3, .wav, .jpg, .jpeg, .png): ");
-                afiseazaFisiere(scan.cautaFisiereDupaExtensie(in.nextLine()));
+                afiseazaFisiere(scan.cautaToateFisiereleSortateDupaExtensie());
                 break;
             default:
                 System.out.println("Optiune invalida!");

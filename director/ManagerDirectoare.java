@@ -30,7 +30,7 @@ public class ManagerDirectoare {
 
     /**
      * Adauga un director in lista de directoare monitorizate.
-     * Calea trebuie sa indice un director existent si accesibil.
+     * Directorul este creat daca nu exista, cu conditia ca directorul parinte sa existe.
      *
      * @param cale calea directorului introdusa de utilizator
      * @throws DirectorInvalidException daca calea nu indica un director valid si accesibil
@@ -41,6 +41,10 @@ public class ManagerDirectoare {
             throw new DirectorInvalidException("Calea nu poate fi citita.");
 
         File director = new File(cale.trim());
+        if (!director.exists() && !director.mkdir() && !director.isDirectory())
+            throw new DirectorInvalidException(
+                    "Nu s-a putut crea directorul. Verifica calea si daca directorul parinte exista: " + cale);
+
         if (!director.exists() || !director.isDirectory() || !director.canRead() || !director.canExecute())
             throw new DirectorInvalidException("Calea nu indica un director existent si accesibil: " + cale);
 

@@ -7,6 +7,7 @@ import factory.FactoryFisierMultimedia;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -111,6 +112,13 @@ public class ScannerFisiere {
         for (FisierMultimedia fisier : cautaToateFisiereleMedia())
             if (fisier.getTip() == tip)
                 rezultate.add(fisier);
+        return rezultate;
+    }
+
+    public List<FisierMultimedia> cautaToateFisiereleSortateDupaExtensie() {
+        List<FisierMultimedia> rezultate = cautaToateFisiereleMedia();
+        rezultate.sort(Comparator.comparing(FisierMultimedia::getExtensie)
+                .thenComparing(FisierMultimedia::getNume, String.CASE_INSENSITIVE_ORDER));
         return rezultate;
     }
 
