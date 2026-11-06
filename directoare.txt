@@ -1,2 +1,3 @@
 /Users/sfetcuandreeadaniela/Desktop/Aplicatie-Java-pentru-gestiunea-fisierelor-multimedia/imagini
 /Users/sfetcuandreeadaniela/Desktop/Aplicatie-Java-pentru-gestiunea-fisierelor-multimedia/audio
+/Users/sfetcuandreeadaniela/Desktop/Aplicatie-Java-pentru-gestiunea-fisierelor-multimedia/test

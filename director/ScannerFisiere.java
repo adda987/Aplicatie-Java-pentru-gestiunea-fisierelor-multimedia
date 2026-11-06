@@ -5,6 +5,8 @@ import clase.TipFisier;
 import factory.FactoryFisierMultimedia;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -70,16 +72,22 @@ public class ScannerFisiere {
         }
     }
 
-    public void afiseazaStatistici() {
+    public void salveazaStatistici(String cale) throws IOException {
+        try (FileWriter scriitor = new FileWriter(cale)) {
+            scriitor.write(genereazaStatistici());
+        }
+    }
+
+    private String genereazaStatistici() {
         cautaToateFisiereleMedia();
         int total = 0;
         String[] extensii = {".mp3", ".wav", ".jpg", ".jpeg", ".png"};
-        System.out.println("Statistici fisiere multimedia:");
+        StringBuilder raport = new StringBuilder("Statistici fisiere multimedia:\n");
         for (int i = 0; i < statistici.length; i++) {
-            System.out.println(extensii[i] + ": " + statistici[i]);
+            raport.append(extensii[i]).append(": ").append(statistici[i]).append('\n');
             total += statistici[i];
         }
-        System.out.println("Total: " + total);
+        return raport.append("Total: ").append(total).append('\n').toString();
     }
 
     /**
@@ -90,6 +98,8 @@ public class ScannerFisiere {
      * @param rezultate lista in care se adauga fisierele gasite
      */
     private void parcurgeDirector(File director, List<FisierMultimedia> rezultate) {
+        if (!director.exists())
+            return; // Un director nou va fi creat abia la iesire.
         File[] continut = director.listFiles();
         if (continut == null) {
             System.out.println("Directorul nu exista sau nu poate fi accesat: " + director.getAbsolutePath());

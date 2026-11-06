@@ -5,5 +5,4 @@
 4. Afiseaza fisiere multimedia
 5. Filtreaza fisiere
 6. Aplica efect pe o imagine
-7. Afiseaza statistici fisiere multimedia
 0. Iesire

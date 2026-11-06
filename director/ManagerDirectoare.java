@@ -17,6 +17,7 @@ public class ManagerDirectoare {
 
     private final String caleFisier;
     private final List<String> directoare;
+    private final List<File> directoareNoi = new ArrayList<>();
 
     public ManagerDirectoare(String caleFisier) {
         this.caleFisier = caleFisier;
@@ -30,33 +31,28 @@ public class ManagerDirectoare {
 
     /**
      * Adauga un director in lista de directoare monitorizate.
-     * Directorul este creat daca nu exista, cu conditia ca directorul parinte sa existe.
+     * Directorul este creat la iesire daca nu exista, cu conditia ca parintele sa existe.
      *
      * @param cale calea directorului introdusa de utilizator
      * @throws DirectorInvalidException daca calea nu indica un director valid si accesibil
-     * @throws IOException daca lista directoarelor nu poate fi salvata
      */
-    public void adaugaDirector(String cale) throws IOException {
+    public void adaugaDirector(String cale) {
         if (cale == null || cale.trim().isEmpty())
             throw new DirectorInvalidException("Calea nu poate fi citita.");
 
         File director = new File(cale.trim());
-        if (!director.exists() && !director.mkdir() && !director.isDirectory())
-            throw new DirectorInvalidException(
-                    "Nu s-a putut crea directorul. Verifica calea si daca directorul parinte exista: " + cale);
-
-        if (!director.exists() || !director.isDirectory() || !director.canRead() || !director.canExecute())
+        File parinte = director.getAbsoluteFile().getParentFile();
+        if (!director.exists() && (parinte == null || !parinte.isDirectory()
+                || !parinte.canWrite() || !parinte.canExecute()))
+            throw new DirectorInvalidException("Directorul parinte nu exista sau nu este accesibil: " + cale);
+        if (director.exists() && (!director.isDirectory() || !director.canRead() || !director.canExecute()))
             throw new DirectorInvalidException("Calea nu indica un director existent si accesibil: " + cale);
 
         String caleAbsoluta = director.getAbsolutePath();
         if (!directoare.contains(caleAbsoluta)) {
             directoare.add(caleAbsoluta);
-            try {
-                salveazaInFisier();
-            } catch (IOException e) {
-                directoare.remove(caleAbsoluta);
-                throw e;
-            }
+            if (!director.exists())
+                directoareNoi.add(director.getAbsoluteFile());
         }
     }
 
@@ -65,22 +61,11 @@ public class ManagerDirectoare {
      *
      * @param cale calea directorului ce trebuie eliminat
      * @return true daca directorul a fost gasit si eliminat, altfel false
-     * @throws IOException daca lista directoarelor nu poate fi salvata
      */
-    public boolean stergeDirector(String cale) throws IOException {
+    public boolean stergeDirector(String cale) {
         String caleAbsoluta = new File(cale.trim()).getAbsolutePath();
-        int index = directoare.indexOf(caleAbsoluta);
-        if (index >= 0) {
-            directoare.remove(index);
-            try {
-                salveazaInFisier();
-            } catch (IOException e) {
-                directoare.add(index, caleAbsoluta);
-                throw e;
-            }
-            return true;
-        }
-        return false;
+        directoareNoi.remove(new File(caleAbsoluta));
+        return directoare.remove(caleAbsoluta);
     }
 
     /**
@@ -118,9 +103,12 @@ public class ManagerDirectoare {
     }
 
     /**
-     * Scrie lista de directoare in fisier, cate unul pe linie.
+     * Creeaza directoarele noi si salveaza lista la inchiderea aplicatiei.
      */
-    private void salveazaInFisier() throws IOException {
+    public void salveazaInFisier() throws IOException {
+        for (File director : directoareNoi)
+            if (!director.isDirectory() && !director.mkdir())
+                throw new IOException("Nu s-a putut crea directorul: " + director);
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(caleFisier))) {
             for (String director : directoare)
                 bw.write(director + System.lineSeparator());

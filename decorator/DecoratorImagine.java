@@ -16,6 +16,7 @@ import javax.imageio.ImageIO;
 public abstract class DecoratorImagine implements InterfataImagine {
 
     protected InterfataImagine imagine;
+    private int[][] pixeli;
 
     public DecoratorImagine(InterfataImagine imagine) {
         this.imagine = imagine;
@@ -36,7 +37,9 @@ public abstract class DecoratorImagine implements InterfataImagine {
      */
     @Override
     public int[][] getPixeli() throws IOException {
-        int[][] pixeli = imagine.getPixeli();
+        if (pixeli != null)
+            return pixeli;
+        pixeli = imagine.getPixeli();
         for (int i = 0; i < pixeli.length; i++)
             for (int j = 0; j < pixeli[i].length; j++) {
                 Color culoare = new Color(pixeli[i][j]);
