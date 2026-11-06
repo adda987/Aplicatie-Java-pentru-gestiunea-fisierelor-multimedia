@@ -14,9 +14,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
 
 public class Main {
@@ -26,7 +24,6 @@ public class Main {
         ScannerFisiere scan = new ScannerFisiere(manager);
         Scanner in = new Scanner(System.in);
         String meniu = citesteMeniu("meniu.txt");
-        Map<DecoratorImagine, String> imaginiDeSalvat = new LinkedHashMap<>();
 
         String optiune = "";
         while (!optiune.equals("0")) {
@@ -42,17 +39,23 @@ public class Main {
                     System.out.print("Introdu calea directorului: ");
                     try {
                         manager.adaugaDirector(in.nextLine());
-                        System.out.println("Directorul a fost adaugat in memorie; se salveaza la iesire.");
+                        System.out.println("Directorul a fost adaugat.");
                     } catch (IllegalArgumentException e) {
                         System.out.println("Eroare: " + e.getMessage());
+                    } catch (IOException e) {
+                        System.out.println("Eroare la crearea directorului sau salvarea listei: " + e.getMessage());
                     }
                     break;
                 case "3":
                     System.out.print("Introdu calea directorului pe care vrei sa il stergi: ");
-                    if (manager.stergeDirector(in.nextLine()))
-                        System.out.println("Directorul a fost sters din lista.");
-                    else
-                        System.out.println("Directorul nu exista in lista.");
+                    try {
+                        if (manager.stergeDirector(in.nextLine()))
+                            System.out.println("Directorul a fost sters din lista.");
+                        else
+                            System.out.println("Directorul nu exista in lista.");
+                    } catch (IOException e) {
+                        System.out.println("Eroare la salvarea listei de directoare: " + e.getMessage());
+                    }
                     break;
                 case "4":
                     afiseazaFisiere(scan.cautaToateFisiereleMedia());
@@ -61,25 +64,12 @@ public class Main {
                     filtreazaFisiere(in, scan);
                     break;
                 case "6":
-                    aplicaEfect(in, scan, imaginiDeSalvat);
+                    aplicaEfect(in, scan);
                     break;
                 case "0":
                     break;
                 default:
                     System.out.println("Optiune invalida!");
-            }
-        }
-        try {
-            manager.salveazaInFisier();
-        } catch (IOException e) {
-            System.out.println("Eroare la salvarea directoarelor: " + e.getMessage());
-        }
-        for (Map.Entry<DecoratorImagine, String> imagine : imaginiDeSalvat.entrySet()) {
-            try {
-                File salvat = imagine.getKey().salveaza(imagine.getValue());
-                System.out.println("Imagine salvata: " + salvat.getAbsolutePath());
-            } catch (IOException e) {
-                System.out.println("Eroare la salvarea imaginii: " + e.getMessage());
             }
         }
         try {
@@ -126,10 +116,9 @@ public class Main {
 
     /**
      * Utilizatorul alege o imagine si un efect. Imaginea este "decorata" cu efectul ales
-     * si pastrata in memorie pana la iesire, cand se salveaza langa original.
+     * si salvata imediat in acelasi director cu imaginea originala.
      */
-    private static void aplicaEfect(Scanner in, ScannerFisiere scan,
-                                  Map<DecoratorImagine, String> imaginiDeSalvat) {
+    private static void aplicaEfect(Scanner in, ScannerFisiere scan) {
         List<FisierMultimedia> imagini = scan.cautaFisiereDupaTip(TipFisier.IMAGINE);
         if (imagini.isEmpty()) {
             System.out.println("Nu au fost gasite imagini.");
@@ -174,12 +163,12 @@ public class Main {
         }
 
         try {
-            decorator.getPixeli();
-            imaginiDeSalvat.put(decorator, new File(imagine.getCale()).getParent());
+            String director = new File(imagine.getCale()).getParent();
+            File salvat = decorator.salveaza(director);
             System.out.println(decorator.genereazaDescriere());
-            System.out.println("Imaginea procesata este in memorie; se salveaza la iesire.");
+            System.out.println("Imaginea a fost salvata in: " + salvat.getAbsolutePath());
         } catch (IOException e) {
-            System.out.println("Eroare la procesarea imaginii: " + e.getMessage());
+            System.out.println("Eroare la salvarea imaginii: " + e.getMessage());
         }
     }
 

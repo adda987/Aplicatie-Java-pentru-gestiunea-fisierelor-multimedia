@@ -98,8 +98,6 @@ public class ScannerFisiere {
      * @param rezultate lista in care se adauga fisierele gasite
      */
     private void parcurgeDirector(File director, List<FisierMultimedia> rezultate) {
-        if (!director.exists())
-            return; // Un director nou va fi creat abia la iesire.
         File[] continut = director.listFiles();
         if (continut == null) {
             System.out.println("Directorul nu exista sau nu poate fi accesat: " + director.getAbsolutePath());
